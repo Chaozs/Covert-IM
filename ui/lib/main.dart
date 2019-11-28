@@ -34,7 +34,9 @@ class CovertUI extends StatelessWidget {
 class ChatWidget extends StatefulWidget {
   final String name;
   final IconData icon;
-  ChatWidget({Key key, @required this.name, @required this.icon}) : super(key: key);
+  final String port;
+  ChatWidget({Key key, @required this.name, @required this.icon,
+              this.port}) : super(key: key);
 
   @override
   createState() => _ChatWidgetState();
@@ -60,7 +62,7 @@ class _ChatWidgetState extends State<ChatWidget> {
 
   Future<_Post> _fetchPost(covert, uid) async {
     final response =
-        await http.post('http://localhost:5000/chat/get',
+        await http.post('http://localhost:${widget.port}/chat/get',
         headers: {"Content-Type": "application/json"},
         body: json.encode({'covert': covert, 'uid': uid,}));
 
@@ -75,7 +77,7 @@ class _ChatWidgetState extends State<ChatWidget> {
 
   void _pushPost(covert, uid, msg) async {
     final response =
-        await http.post('http://localhost:5000/chat/post',
+        await http.post('http://localhost:${widget.port}/chat/post',
         headers: {"Content-Type": "application/json"},
         body: json.encode({'covert': covert, 'uid': uid, 'msg': msg}));
 
@@ -93,7 +95,7 @@ class _ChatWidgetState extends State<ChatWidget> {
       setState(() {
         _fetchPost(widget.name, myID).then( (data) {
           if(data.body != ''){
-              msgs.add('From ${widget.name}: ${data.body}');
+              msgs.add('${data.body}');
               sends.add(false);
             }
           }, onError: (err) {
@@ -129,7 +131,7 @@ class _ChatWidgetState extends State<ChatWidget> {
               hintText: 'try to say: Hello',
             ),
             onSubmitted: (input) {
-              msgs.add(input);
+              // msgs.add(input);
               sends.add(true);
               eCtrl.clear();
               setState(() { 
@@ -147,12 +149,14 @@ class _ChatWidgetState extends State<ChatWidget> {
 Widget _buildMsg(icon, msg, send) => Container(
   padding: EdgeInsets.only(left: 12),
   child: Row(
-    mainAxisAlignment: send ? MainAxisAlignment.end : MainAxisAlignment.start,
+    // mainAxisAlignment: send ? MainAxisAlignment.end : MainAxisAlignment.start,
+    mainAxisAlignment: MainAxisAlignment.start,
+
     children: <Widget>[
-      Icon(
-        send ? me : icon,
-        // color: Colors.deepPurple[200],
-      ),
+      // Icon(
+      //   send ? me : icon,
+      //   // color: Colors.deepPurple[200],
+      // ),
       Container(
         margin: EdgeInsets.all(10),
         padding: EdgeInsets.all(12),
@@ -166,7 +170,7 @@ Widget _buildMsg(icon, msg, send) => Container(
         child: Text(
           msg,
           style: TextStyle(
-            fontSize: 16,
+            fontSize: 20,
             fontWeight: FontWeight.w400,
           ),
           softWrap: true,
@@ -176,6 +180,7 @@ Widget _buildMsg(icon, msg, send) => Container(
   ),
 );
 
+String myPort = '1234';
 class ChatroomsPage extends StatelessWidget {
   final List<String> chatrooms;
   
@@ -187,6 +192,19 @@ class ChatroomsPage extends StatelessWidget {
       title: Text('Hiddenor'),
       // backgroundColor: Colors.deepPurple[200],
     ),
+    bottomNavigationBar: BottomAppBar(
+      child: TextField(
+        decoration: InputDecoration(
+          border: OutlineInputBorder(),
+          icon: Icon(Icons.network_check),
+          hintText: 'Input your local client port',
+        ),
+        onSubmitted: 
+          (input) {
+            myPort = input;
+          }
+      ),
+      ),
     body: Center(
       child : ListView.builder(
         itemCount: chatrooms.length,
@@ -201,7 +219,8 @@ class ChatroomsPage extends StatelessWidget {
               MaterialPageRoute(
                 builder: (context) => ChatWidget(
                   name: chatrooms[idx], 
-                  icon: icons[(idx%5).toInt()])
+                  icon: icons[(idx%5).toInt()],
+                  port: myPort,)
               )
             );
           },

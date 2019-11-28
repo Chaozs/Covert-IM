@@ -1,5 +1,8 @@
+import sys
 from flask import Flask, json, request
 from flask_cors import CORS, cross_origin
+from socket import AF_INET, socket, SOCK_STREAM
+from threading import Thread
 
 MSG_BUFFFER = []
 
@@ -11,19 +14,11 @@ api.config['CORS_HEADERS'] = 'Content-Type'
 def get_companies():
     req_data = request.get_json()
     covert = req_data.get('covert')
-    uid = req_data.get('uid')
+    # uid = req_data.get('uid')
     find = False
     if MSG_BUFFFER:
-        for idx, id_msg in enumerate(MSG_BUFFFER):
-            if id_msg[0] != uid:
-                msg = id_msg[1]
-                find = True
-                break
-        if find:
-            del MSG_BUFFFER[idx]
-            find = False
-        else:
-            msg = ''
+        msg = MSG_BUFFFER[-1]
+        del MSG_BUFFFER[-1]
     else:
         msg = ''
     return json.dumps({
@@ -36,9 +31,40 @@ def post_companies():
     covert = req_data.get('covert')
     uid = req_data.get('uid')
     msg = req_data.get('msg')
-    MSG_BUFFFER.append((uid, msg))
+    # MSG_BUFFFER.append((uid, msg))
+    send(msg)
     print(MSG_BUFFFER)
     return json.dumps({"success": True}), 201
 
+HOST = '127.0.0.1'
+PORT = 33000
+
+BUFSIZ = 1024
+ADDR = (HOST, PORT)
+
+CLIENT_SOCKET = socket(AF_INET, SOCK_STREAM)
+CLIENT_SOCKET.connect(ADDR)
+
+def receive():
+    """Handles receiving of messages."""
+    #infinite loop due to receiving messages non-deterministically
+    while True:
+        try:
+            msg = CLIENT_SOCKET.recv(BUFSIZ).decode("utf8")
+            MSG_BUFFFER.append(msg)
+        except OSError:  # Possibly client has left the chat.
+            break
+
+
+def send(msg):  # implictly passed by binders.
+    """Handles sending of messages."""
+    CLIENT_SOCKET.send(bytes(msg, "utf8"))
+
+receive_thread = Thread(target=receive)
+receive_thread.start()
+
 if __name__ == '__main__':
-    api.run(debug=True)
+    try:
+        api.run(debug=True, port=sys.argv[1])
+    except IndexError:
+        print('Port Please')
