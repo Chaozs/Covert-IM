@@ -1,4 +1,4 @@
-package com.example.covertui
+package com.example.ui
 
 import android.os.Bundle
 import io.flutter.app.FlutterActivity
