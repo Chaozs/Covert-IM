@@ -21,6 +21,7 @@ def get_companies():
                 break
         if find:
             del MSG_BUFFFER[idx]
+            find = False
         else:
             msg = ''
     else:
