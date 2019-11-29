@@ -6,6 +6,15 @@ from threading import Thread
 
 MSG_BUFFFER = []
 
+HOST = '127.0.0.1'
+PORT = 33000
+
+BUFSIZ = 1024
+ADDR = (HOST, PORT)
+
+CLIENT_SOCKET = socket(AF_INET, SOCK_STREAM)
+CLIENT_SOCKET.connect(ADDR)
+
 api = Flask(__name__)
 cors = CORS(api)
 api.config['CORS_HEADERS'] = 'Content-Type'
@@ -31,19 +40,11 @@ def post_companies():
     covert = req_data.get('covert')
     uid = req_data.get('uid')
     msg = req_data.get('msg')
+    if msg == "{quit}": #client is closed
+        CLIENT_SOCKET.close()
     # MSG_BUFFFER.append((uid, msg))
     send(msg)
-    print(MSG_BUFFFER)
     return json.dumps({"success": True}), 201
-
-HOST = '127.0.0.1'
-PORT = 33000
-
-BUFSIZ = 1024
-ADDR = (HOST, PORT)
-
-CLIENT_SOCKET = socket(AF_INET, SOCK_STREAM)
-CLIENT_SOCKET.connect(ADDR)
 
 def receive():
     """Handles receiving of messages."""
@@ -55,16 +56,14 @@ def receive():
         except OSError:  # Possibly client has left the chat.
             break
 
-
 def send(msg):  # implictly passed by binders.
     """Handles sending of messages."""
     CLIENT_SOCKET.send(bytes(msg, "utf8"))
 
-receive_thread = Thread(target=receive)
-receive_thread.start()
-
 if __name__ == '__main__':
     try:
+        receive_thread = Thread(target=receive)
+        receive_thread.start()
         api.run(debug=True, port=sys.argv[1])
     except IndexError:
         print('Port Please')
