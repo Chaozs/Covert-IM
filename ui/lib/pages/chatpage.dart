@@ -21,7 +21,7 @@ class ChatPage extends StatefulWidget {
 }
 
 class _ChatPageState extends State<ChatPage> {
-
+  final _listKey = GlobalKey<AnimatedListState>();
   List<String> msgs = [];
 
   final TextEditingController eCtrl = TextEditingController();
@@ -57,15 +57,16 @@ class _ChatPageState extends State<ChatPage> {
   void initState() {
     super.initState();
     Timer.periodic(oneSec, (timer) {
-      setState(() {
+
         _fetchPost(widget.covert, widget.uid).then( (data) {
           if(data.body != ''){
               msgs.add('${data.body}');
+              _listKey.currentState.insertItem(msgs.length-1);
             }
           }, onError: (err) {
             print(err);
           });
-      });
+
     });
   }
 
@@ -78,9 +79,12 @@ class _ChatPageState extends State<ChatPage> {
     body: Column(
       children: <Widget>[
         Expanded(
-          child: ListView.builder(
-            itemCount: msgs.length,
-            itemBuilder: (BuildContext context, int idx) => buildMsg(msgs[idx])
+          child: AnimatedList(
+            key: _listKey,
+            initialItemCount: msgs.length,
+            itemBuilder: (context, idx, animation) => SizeTransition(
+              sizeFactor: animation,
+              child: buildMsg(msgs[idx]),)
           ),
         ),
         Container(

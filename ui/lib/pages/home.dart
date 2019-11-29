@@ -1,5 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:ui/pages/chatrooms.dart';
+import 'dart:math' as math;
+
+class PeakQuadraticCurve extends Curve {
+  @override
+  double transform(double t) {
+    assert(t >= 0.0 && t <= 1.0);
+    return -15 * math.pow(t, 2) + 15 * t + 1;
+  }
+}
 
 class PortPage extends StatefulWidget {
   @override
@@ -36,8 +45,8 @@ class _PortPageState extends State<PortPage> with SingleTickerProviderStateMixin
   initState() {
     super.initState();
     controller = AnimationController(
-        duration: const Duration(seconds: 1), vsync: this);
-    animation = CurvedAnimation(parent: controller, curve: Curves.easeIn);
+        duration: const Duration(seconds: 2), vsync: this);
+    animation = CurvedAnimation(parent: controller, curve: Curves.easeInCubic);
     controller.forward();
   }
 
@@ -50,15 +59,43 @@ class _PortPageState extends State<PortPage> with SingleTickerProviderStateMixin
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              FadeTransition(
-                opacity: animation,
-                child: Text(
-                  noport ? port : 'YOUR PORT: $port',
-                  style: TextStyle(
-                    fontSize: 50,
-                    fontWeight: FontWeight.bold,
+              SizeTransition(
+                sizeFactor: animation,
+                child: Center(
+                  child: Hero(
+                    flightShuttleBuilder: (
+                      BuildContext flightContext,
+                      Animation<double> animation,
+                      HeroFlightDirection flightDirection,
+                      BuildContext fromHeroContext,
+                      BuildContext toHeroContext,
+                    ) {
+                      final Hero toHero = toHeroContext.widget;
+                      return ScaleTransition(
+                        scale: animation.drive(
+                          Tween<double>(begin: 0.0, end: 1.0).chain(
+                            CurveTween(
+                              curve: Interval(0.0, 1.0,
+                                curve: PeakQuadraticCurve()),
+                            ),
+                          ),
+                        ),
+                        child: toHero.child,
+                      );
+                    },
+                    tag: 'sel_port',
+                    child: Material(
+                      type: MaterialType.transparency,
+                      child: Text(
+                        noport ? port : 'YOUR PORT: $port',
+                        style: TextStyle(
+                          fontSize: 50,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
                   ),
-                  textAlign: TextAlign.center,
                 ),
               ),
               Container(
@@ -76,25 +113,31 @@ class _PortPageState extends State<PortPage> with SingleTickerProviderStateMixin
                 ),
               ),
               noport? SizedBox() :
-              FadeTransition(
-                opacity: animation,
-                child: GestureDetector(
-                  onTap: () {
-                    _toChatroom(port);
-                  },
-                  child: Container(
-                    width: 75,
-                    height: 110,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: <Widget>[
-                        Text(
-                          'Tap to Chat'
-                        ),
-                        Image.asset(
-                          'assets/images/v.png',
-                        ),
-                      ],
+              SizeTransition(
+                sizeFactor: animation,
+                child: Center(
+                  child: GestureDetector(
+                    onTap: () {
+                      _toChatroom(port);
+                    },
+                    child: Container(
+                      width: 110,
+                      height: 110,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: <Widget>[
+                          Text(
+                            'TAP TO CHAT',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Image.asset(
+                            'assets/images/v.png',
+                            height: 80,
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
