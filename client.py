@@ -3,10 +3,12 @@
 """Script for Tkinter GUI chat client."""
 from socket import AF_INET, socket, SOCK_STREAM
 from threading import Thread
-from scapy.all import sniff
+from scapy import all as scapy
 import tkinter #python GUI bilding tool
 import sys
 
+numChannels = 2
+mode = 0
 
 def receive():
     """Handles receiving of messages."""
@@ -27,6 +29,15 @@ def send(event=None):  # implictly passed by binders.
     if msg == "{quit}": #client is closed
         client_socket.close()
         top.quit()
+def swap(event=None):
+    global mode
+    global numChannel
+    if mode == (numChannels - 1):
+        mode = 0
+        print (mode)
+    else:
+        mode = mode + 1
+        print (mode)
 
 
 def on_closing(event=None):
@@ -67,6 +78,8 @@ entry_field.bind("<Return>", send)
 entry_field.pack()
 send_button = tkinter.Button(top, text="Send", command=send)
 send_button.pack()
+switch_button = tkinter.Button(top, text="Swap", command=swap)
+switch_button.pack()
 
 top.protocol("WM_DELETE_WINDOW", on_closing)
 
