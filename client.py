@@ -9,6 +9,8 @@ import sys
 
 numChannels = 2
 mode = 0
+msg = ""
+pkt = None
 
 def receive():
     """Handles receiving of messages."""
@@ -22,13 +24,22 @@ def receive():
 
 
 def send(event=None):  # implictly passed by binders.
+    global mode
+    global msg
     """Handles sending of messages."""
     msg = my_msg.get() #input field on GUI
     my_msg.set("")  # Clears input field.
-    client_socket.send(bytes(msg, "utf8"))
-    if msg == "{quit}": #client is closed
-        client_socket.close()
-        top.quit()
+    if mode == 0:
+        client_socket.send(bytes(msg, "utf8"))
+        if msg == "{quit}": #client is closed
+            client_socket.close()
+            top.quit()
+    if mode == 1:
+        msg += "\n"
+        for char in msg:
+            new_pkt = craft(char)
+            scapy.send(new_pkt)
+
 def swap(event=None):
     global mode
     global numChannel
@@ -54,6 +65,15 @@ def parse(pkt):
 
 def covertListen():
     scapy.sniff(filter="tcp", prn=parse)
+
+# Craft the packet to send
+def craft(character):
+	global pkt
+	global HOST
+	dest = HOST
+	char = ord(character) # covert character to decimal value
+	pkt=scapy.IP(dst=dest)/scapy.TCP(sport=char, dport=scapy.RandNum(0, 65535), flags="E")
+	return pkt
 
 top = tkinter.Tk()
 top.title("Chatter")
