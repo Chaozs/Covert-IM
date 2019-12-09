@@ -9,6 +9,7 @@ from covertChan1 import sendCovert, covertListen
 numChannels = 2 #Number of different chat channels
 mode = 0        #which chat channel
 msg = ""
+covertMsg = ""  #covert channel message
 
 
 def receive():
