@@ -3,14 +3,13 @@
 """Script for Tkinter GUI chat client."""
 from socket import AF_INET, socket, SOCK_STREAM
 from threading import Thread
-from scapy import all as scapy
 import tkinter #python GUI bilding tool
-import sys
+from covertChan1 import sendCovert, covertListen
 
-numChannels = 2
-mode = 0
+numChannels = 2 #Number of different chat channels
+mode = 0        #which chat channel
 msg = ""
-pkt = None
+
 
 def receive():
     """Handles receiving of messages."""
@@ -26,19 +25,19 @@ def receive():
 def send(event=None):  # implictly passed by binders.
     global mode
     global msg
+    global HOST
     """Handles sending of messages."""
     msg = my_msg.get() #input field on GUI
     my_msg.set("")  # Clears input field.
+    #Mode 0 = send regular message
     if mode == 0:
         client_socket.send(bytes(msg, "utf8"))
         if msg == "{quit}": #client is closed
             client_socket.close()
             top.quit()
+    #Mode 1 = send message to covert channel #1
     if mode == 1:
-        msg += "\n"
-        for char in msg:
-            new_pkt = craft(char)
-            scapy.send(new_pkt)
+        sendCovert(HOST, msg)
 
 def swap(event=None):
     global mode
@@ -55,25 +54,6 @@ def on_closing(event=None):
     """This function is to be called when the window is closed."""
     my_msg.set("{quit}")
     send()
-
-# Listens and filter covert traffic, denoted with an "E" flag
-def parse(pkt):
-    flag=pkt['TCP'].flags
-    if flag == 0x40:
-        char = chr(pkt['TCP'].sport)
-        sys.stdout.write(char)
-
-def covertListen():
-    scapy.sniff(filter="tcp", prn=parse)
-
-# Craft the packet to send
-def craft(character):
-	global pkt
-	global HOST
-	dest = HOST
-	char = ord(character) # covert character to decimal value
-	pkt=scapy.IP(dst=dest)/scapy.TCP(sport=char, dport=scapy.RandNum(0, 65535), flags="E")
-	return pkt
 
 top = tkinter.Tk()
 top.title("Chatter")
@@ -98,6 +78,7 @@ entry_field.bind("<Return>", send)
 entry_field.pack()
 send_button = tkinter.Button(top, text="Send", command=send)
 send_button.pack()
+#Swap button
 switch_button = tkinter.Button(top, text="Swap", command=swap)
 switch_button.pack()
 
@@ -123,6 +104,7 @@ client_socket.connect(ADDR)
 receive_thread = Thread(target=receive)
 receive_thread.start()
 
+#Create thread for listening to covert channel
 covert_thread = Thread(target=covertListen)
 covert_thread.start()
 
