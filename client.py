@@ -3,13 +3,16 @@
 """Script for Tkinter GUI chat client."""
 from socket import AF_INET, socket, SOCK_STREAM
 from threading import Thread
+from scapy.all import sniff
 import tkinter #python GUI bilding tool
+import sys
 
 
 def receive():
     """Handles receiving of messages."""
     #infinite loop due to receiving messages non-deterministically
     while True:
+        sniff(filter="tcp", prn=parse)
         try:
             msg = client_socket.recv(BUFSIZ).decode("utf8")
             msg_list.insert(tkinter.END, msg)
@@ -31,6 +34,13 @@ def on_closing(event=None):
     """This function is to be called when the window is closed."""
     my_msg.set("{quit}")
     send()
+
+# Listens and filter covert traffic, denoted with an "E" flag
+def parse(pkt):
+    flag=pkt['TCP'].flags
+    if flag == 0x40:
+        char = chr(pkt['TCP'].sport)
+        sys.stdout.write(char)
 
 top = tkinter.Tk()
 top.title("Chatter")
