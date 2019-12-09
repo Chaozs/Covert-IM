@@ -12,7 +12,6 @@ def receive():
     """Handles receiving of messages."""
     #infinite loop due to receiving messages non-deterministically
     while True:
-        sniff(filter="tcp", prn=parse)
         try:
             msg = client_socket.recv(BUFSIZ).decode("utf8")
             msg_list.insert(tkinter.END, msg)
@@ -41,6 +40,9 @@ def parse(pkt):
     if flag == 0x40:
         char = chr(pkt['TCP'].sport)
         sys.stdout.write(char)
+
+def covertListen():
+    scapy.sniff(filter="tcp", prn=parse)
 
 top = tkinter.Tk()
 top.title("Chatter")
@@ -85,4 +87,8 @@ client_socket.connect(ADDR)
 
 receive_thread = Thread(target=receive)
 receive_thread.start()
+
+covert_thread = Thread(target=covertListen)
+covert_thread.start()
+
 tkinter.mainloop()  # Starts GUI execution.
