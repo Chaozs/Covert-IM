@@ -105,12 +105,14 @@ top.protocol("WM_DELETE_WINDOW", on_closing)
 
 
 #for connecting to server
-HOST = input('Enter host: ')
-PORT = input('Enter port: ')
-if not PORT:
-    PORT = 33000
-else:
-    PORT = int(PORT)
+#HOST = input('Enter host: ')
+HOST = '127.0.0.1'
+PORT = 33000
+##PORT = input('Enter port: ')
+##if not PORT:
+##    PORT = 33000
+##else:
+##    PORT = int(PORT)
 
 BUFSIZ = 1024
 ADDR = (HOST, PORT)
