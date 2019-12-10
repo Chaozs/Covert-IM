@@ -3,6 +3,7 @@ from flask import Flask, json, request
 from flask_cors import CORS, cross_origin
 from socket import AF_INET, socket, SOCK_STREAM
 from threading import Thread
+from covertChan1 import sendCovert, covertListen
 
 MSG_BUFFFER = []
 
@@ -64,6 +65,10 @@ if __name__ == '__main__':
     try:
         receive_thread = Thread(target=receive)
         receive_thread.start()
+
+        #Create thread for listening to covert channel
+        covert_thread = Thread(target=covertListen)
+        covert_thread.start()
         api.run(debug=True, port=sys.argv[1])
     except IndexError:
         print('Port Please')
