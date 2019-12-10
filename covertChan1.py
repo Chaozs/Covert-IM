@@ -10,7 +10,7 @@ from scapy import *
 #Send covert message
 def sendCovert(dest, msg):
         msg += "\n"
-        temp_char_list = ["0","0","0","0"]
+        temp_char_list = ["255","255","255","255"]
         i = 0
         src_ip = ""
         #print("Message to send is: "+msg)
@@ -21,7 +21,7 @@ def sendCovert(dest, msg):
                         #        print(t)
                         src_ip = spoof_IP(temp_char_list)
                         i=0
-                        temp_char_list = ["*","*","*","*"]
+                        temp_char_list = ["255","255","255","255"]
                         temp_char_list[i] = char
                         i = i+1
                         new_pkt = craft(src_ip, dest)
