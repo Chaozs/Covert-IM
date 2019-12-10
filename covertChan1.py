@@ -63,7 +63,7 @@ def parse(pkt):
         char = [chr(int(data[0])), chr(int(data[1])), chr(int(data[2])), chr(int(data[3]))]
         for c in char:
                 out+=c
-        print("Message received was: " + out)
+        sys.stdout.write(out)
 
 # Sniff for packets meeting criteria of parse
 def covertListen():
