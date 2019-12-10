@@ -4,23 +4,36 @@
 from socket import AF_INET, socket, SOCK_STREAM
 from threading import Thread
 import tkinter #python GUI bilding tool
-from covertChan1 import sendCovert, covertListen
+from srcPortSpoof import sendCovert, covertListen
+# import queue #For sharing information between threads.
+import sys
+
 
 numChannels = 2 #Number of different chat channels
 mode = 0        #which chat channel
 msg = ""
 covertMsg = ""  #covert channel message
 
-
 def receive():
     """Handles receiving of messages."""
     #infinite loop due to receiving messages non-deterministically
     while True:
+        
+        # This try is for handling covert messages.
+        # try:
+        #     covertMsg = msgQ.get(False)
+        #     sys.stdout.write(covertMsg)
+        #     msg_list.insert(tkinter.END, covertMsg)
+        # except queue.Empty:
+        #     pass
+
+        # This Try is for handling public messages.
         try:
             msg = client_socket.recv(BUFSIZ).decode("utf8")
             msg_list.insert(tkinter.END, msg)
         except OSError:  # Possibly client has left the chat.
             break
+
 
 
 def send(event=None):  # implictly passed by binders.
@@ -105,8 +118,8 @@ client_socket.connect(ADDR)
 receive_thread = Thread(target=receive)
 receive_thread.start()
 
-#Create thread for listening to covert channel
-covert_thread = Thread(target=covertListen)
+#Create thread for listening to covert channel, passing on a queue as reference.
+covert_thread = Thread(target=covertListen, args=(msgQ,))
 covert_thread.start()
 
 tkinter.mainloop()  # Starts GUI execution.
