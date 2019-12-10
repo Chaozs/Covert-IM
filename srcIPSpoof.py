@@ -8,7 +8,7 @@ from scapy import *
 #testing commits
 
 #Send covert message
-def sendCovert(dest, msg):
+def sendCovertIP(dest, msg):
         msg += "\n"
         temp_char_list = ["255","255","255","255"]
         i = 0
@@ -66,5 +66,5 @@ def parse(pkt):
         sys.stdout.write(out)
 
 # Sniff for packets meeting criteria of parse
-def covertListen():
+def covertListenIP():
     scapy.sniff(filter="tcp", prn=parse)

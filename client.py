@@ -4,12 +4,16 @@
 from socket import AF_INET, socket, SOCK_STREAM
 from threading import Thread
 import tkinter #python GUI bilding tool
-from srcPortSpoof import sendCovert, covertListen
+
+# Files for our services. 
+from srcPortSpoof import sendCovertPort, covertListenPort #as sendPort, portListen
+from srcIPSpoof import sendCovertIP, covertListenIP #as sendIP, ipListen
+
 # import queue #For sharing information between threads.
 import sys
 
 
-numChannels = 2 #Number of different chat channels
+numChannels = 3 #Number of different chat channels
 mode = 0        #which chat channel
 msg = ""
 covertMsg = ""  #covert channel message
@@ -18,15 +22,6 @@ def receive():
     """Handles receiving of messages."""
     #infinite loop due to receiving messages non-deterministically
     while True:
-        
-        # This try is for handling covert messages.
-        # try:
-        #     covertMsg = msgQ.get(False)
-        #     sys.stdout.write(covertMsg)
-        #     msg_list.insert(tkinter.END, covertMsg)
-        # except queue.Empty:
-        #     pass
-
         # This Try is for handling public messages.
         try:
             msg = client_socket.recv(BUFSIZ).decode("utf8")
@@ -49,9 +44,12 @@ def send(event=None):  # implictly passed by binders.
         if msg == "{quit}": #client is closed
             client_socket.close()
             top.quit()
-    #Mode 1 = send message to covert channel #1
+    #Mode 1 = send message to covert channel #1 and same for mode = 2 but for method 2.
     if mode == 1:
-        sendCovert(HOST, msg)
+        sendCovertPort(HOST, msg)
+    elif mode == 2:
+        sendCovertIP(HOST, msg)
+
 
 def swap(event=None):
     global mode
@@ -119,7 +117,10 @@ receive_thread = Thread(target=receive)
 receive_thread.start()
 
 #Create thread for listening to covert channel, passing on a queue as reference.
-covert_thread = Thread(target=covertListen, args=(msgQ,))
-covert_thread.start()
+covert_thread_port = Thread(target=covertListenPort)
+covert_thread_port.start()
+
+covert_thread_IP = Thread(target=covertListenIP)
+covert_thread_IP.start()
 
 tkinter.mainloop()  # Starts GUI execution.
