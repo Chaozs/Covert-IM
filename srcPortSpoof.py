@@ -30,6 +30,7 @@ def parse(pkt):
     if flag == "P":
         char = chr(pkt['TCP'].sport)
         sys.stdout.write(char) # Currently writing to console...
+        sys.stdout.flush()
 
 # Sniff for packets meeting criteria of parse
 def covertListenPort():

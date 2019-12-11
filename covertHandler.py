@@ -3,12 +3,22 @@ from flask import Flask, json, request
 from flask_cors import CORS, cross_origin
 from socket import AF_INET, socket, SOCK_STREAM
 from threading import Thread
-from covertChan1 import sendCovert, covertListen
+# Files for our services. 
+from srcPortSpoof import sendCovertPort, covertListenPort #as sendPort, portListen
+from srcIPSpoof import sendCovertIP, covertListenIP #as sendIP, ipListen
+
+import logging
+log = logging.getLogger('werkzeug')
+log.setLevel(logging.ERROR)
 
 MSG_BUFFFER = []
 
 HOST = '127.0.0.1'
-PORT = 33000
+PORT = input('Enter port: ')
+if not PORT:
+    PORT = 33000
+else:
+    PORT = int(PORT)
 
 BUFSIZ = 1024
 ADDR = (HOST, PORT)
@@ -44,7 +54,7 @@ def post_companies():
     if msg == "{quit}": #client is closed
         CLIENT_SOCKET.close()
     # MSG_BUFFFER.append((uid, msg))
-    send(msg)
+    send(covert, msg)
     return json.dumps({"success": True}), 201
 
 def receive():
@@ -57,18 +67,32 @@ def receive():
         except OSError:  # Possibly client has left the chat.
             break
 
-def send(msg):  # implictly passed by binders.
+def send(covert, msg):  # implictly passed by binders.
     """Handles sending of messages."""
-    CLIENT_SOCKET.send(bytes(msg, "utf8"))
+    global HOST
+    #Send regular message
+    if covert == 'Normal':
+        CLIENT_SOCKET.send(bytes(msg, "utf8"))
+    #Send message through IP Spoof covert channel
+    elif covert == 'IP SPOOF':
+        sendCovertIP(HOST, msg)
+    #Send message through IP Port covert Channel
+    else:
+        sendCovertPort(HOST, msg)
 
 if __name__ == '__main__':
     try:
         receive_thread = Thread(target=receive)
         receive_thread.start()
 
+
         #Create thread for listening to covert channel
-        covert_thread = Thread(target=covertListen)
-        covert_thread.start()
-        api.run(debug=True, port=sys.argv[1])
+        covert_thread_port = Thread(target=covertListenPort)
+        covert_thread_port.start()
+
+        covert_thread_IP = Thread(target=covertListenIP)
+        covert_thread_IP.start()
+        
+        api.run(port=sys.argv[1])
     except IndexError:
         print('Port Please')

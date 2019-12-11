@@ -4,8 +4,8 @@ import 'package:ui/pages/chatpage.dart';
 class ChatroomsPage extends StatelessWidget {
   final List<String> chatrooms = [
      "Normal",
-     "TCP",
-     "IP",
+     "IP SPOOF",
+     "PORT SPOOF",
   ];
   final String port;
   ChatroomsPage({@required this.port});
