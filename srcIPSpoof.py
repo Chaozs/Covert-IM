@@ -25,13 +25,13 @@ def sendCovertIP(dest, msg):
                         temp_char_list[i] = char
                         i = i+1
                         new_pkt = craft(src_ip, dest)
-                        scapy.send(new_pkt)
+                        scapy.send(new_pkt, verbose = False)
         	elif(char == "\n"):
         		temp_char_list[i] = char
         		i=i+1
         		src_ip = spoof_IP(temp_char_list)
         		new_pkt = craft(src_ip, dest)
-        		scapy.send(new_pkt)
+        		scapy.send(new_pkt, verbose = False)
         	else:
                         temp_char_list[i] = char
                         i = i+1
