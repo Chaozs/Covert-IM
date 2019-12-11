@@ -25,13 +25,13 @@ def sendCovertIP(dest, msg):
                         temp_char_list[i] = char
                         i = i+1
                         new_pkt = craft(src_ip, dest)
-                        scapy.send(new_pkt)
+                        scapy.send(new_pkt, verbose=False)
         	elif(char == "\n"):
         		temp_char_list[i] = char
         		i=i+1
         		src_ip = spoof_IP(temp_char_list)
         		new_pkt = craft(src_ip, dest)
-        		scapy.send(new_pkt)
+        		scapy.send(new_pkt, verbose=False)
         	else:
                         temp_char_list[i] = char
                         i = i+1
@@ -64,6 +64,7 @@ def parse(pkt):
         for c in char:
                 out+=c
         sys.stdout.write(out)
+        sys.stdout.flush()
 
 # Sniff for packets meeting criteria of parse
 def covertListenIP():
