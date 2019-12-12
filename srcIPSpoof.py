@@ -13,12 +13,10 @@ def sendCovertIP(dest, msg):
         temp_char_list = ["\0","\0","\0","\0"]
         i = 0
         src_ip = ""
-        #print("Message to send is: "+msg)
+        #This loop goes through the incoming string ofr encoding and break it up into lists of 4 chars to be
+        #sent crafted into a fake IP
         for char in msg:
         	if(i == 4):
-                        #print("Temp list is: ")
-                        #for t in temp_char_list:
-                        #        print(t)
                         src_ip = spoof_IP(temp_char_list)
                         i=0
                         temp_char_list = ["\0","\0","\0","\0"]
@@ -36,7 +34,7 @@ def sendCovertIP(dest, msg):
                         temp_char_list[i] = char
                         i = i+1
         	
-		
+#This function receives a list of chars and converts them to ascii code before making a string to be used as an IP
 def spoof_IP(char_list):
         temp_ip = ""
         temp_ip = str(ord(char_list[0])) + "." + str(ord(char_list[1])) + "." + str(ord(char_list[2])) + "." + str(ord(char_list[3]))
