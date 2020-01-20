@@ -1,4 +1,4 @@
-#Functions for sending and receiving covert channels using scapy
+#Functions for sendingfvsdrvsevsrev and receiving covert channels using scapy
 #Code based off https://github.com/jeffreysasaki/covertchannel/blob/master/src/client.py
 
 import sys
